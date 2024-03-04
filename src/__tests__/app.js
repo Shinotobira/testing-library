@@ -2,11 +2,11 @@ import {render, screen, waitFor} from '@testing-library/react'
 import React from 'react'
 import App from '../app'
 import user from '@testing-library/user-event'
-import {submitForm} from '../api'
+import {server} from '../../tests/server'
 
-jest.mock('../api', () => ({
-  submitForm: jest.fn(),
-}))
+beforeAll(() => server.listen())
+afterAll(() => server.close())
+afterEach(() => server.resetHandlers())
 
 function checkTab(tabLink, text) {
   let result = false
@@ -54,7 +54,7 @@ test('Cas test 1', async () => {
   expect(screen.getByLabelText('Favorite Drink')).toHaveTextContent('Bière')
   expect(screen.getByRole('link')).toHaveTextContent(/Go Back/i)
   expect(screen.getByRole('button')).toHaveTextContent(/Confirm/i)
-  submitForm.mockResolvedValueOnce({message: 'Success'})
+  //appelle de la fonction submitForm
   user.click(screen.getByRole('button'))
 
   //Redirection sur la page de Félicitation
@@ -106,9 +106,7 @@ test('Cas test 2', async () => {
   expect(screen.getByLabelText('Favorite Drink')).toHaveTextContent('Bière')
   expect(screen.getByRole('link')).toHaveTextContent(/Go Back/i)
   expect(screen.getByRole('button')).toHaveTextContent(/Confirm/i)
-  submitForm.mockRejectedValue({
-    message: 'les champs food et drink sont obligatoires',
-  })
+
   user.click(screen.getByRole('button'))
 
   await waitFor(() =>
